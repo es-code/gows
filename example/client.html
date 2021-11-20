@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+    <title>test</title>
+</head>
+<body>
+<center>
+
+    <input id="url" style="height: 50px;width: 20%"  placeholder="Enter WS URL" value="ws://localhost:9000/message/listen">
+    <input id="channel" style="height: 50px;width: 20%"  placeholder="Enter Your channel">
+    <button id="connect" onclick="Connect()"  style="height: 7%;width: 10%">connect</button>
+
+    <div id="data" style="width: 50%; border: 2px solid rgba(0,0,0,0.2);min-height: 40%;max-height:40%;margin-top: 3%;overflow: scroll" ></div>
+
+    <textarea id="message" style="margin-top: 3%;width: 40%; height: 6%" placeholder="Enter Your Message"></textarea>
+
+    <button onclick="SendMessage()" style="height: 7%;width: 10%">send</button>
+</center>
+
+
+
+
+
+<script>
+    let socketMessage;
+    let connected;
+    function Connect(){
+
+        if(connected == true){
+            closeWs();
+            return;
+        }
+
+    if(document.getElementById("url").value.length < 1 || document.getElementById("channel").value.length < 1){
+        alert("please enter your ws url and your channel name");
+        return;
+    }
+
+    let url = document.getElementById("url").value+"?channel="+document.getElementById("channel").value;
+	 socketMessage = new WebSocket(url);
+        socketMessage.addEventListener('open', function (event) {
+            connected = true;
+            switchConnButton();
+
+        });
+        socketMessage.addEventListener('close', function (event) {
+            connected = false;
+            switchConnButton();
+
+        });
+        socketMessage.addEventListener('error',function (){
+            connected = false;
+            switchConnButton();
+        })
+
+        socketMessage.addEventListener('message', function (event) {
+            document.getElementById("data").innerHTML+=event.data+"<br />";
+        });
+
+
+    }
+
+
+
+
+    function SendMessage() {
+        let message=document.getElementById("message").value;
+        if(connected !== true){
+            alert("please connect to your channel")
+            return
+        }
+        if(message.length < 1 ){
+            alert("please enter your message")
+            return
+        }
+        socketMessage.send(message);
+    }
+
+    function closeWs(){
+        console.log("done close")
+        socketMessage.close();
+    }
+
+
+    function switchConnButton(){
+        if(connected == true){
+            document.getElementById("connect").innerText = "Close";
+
+        }else{
+            document.getElementById("connect").innerText = "Connect";
+
+        }
+    }
+
+
+
+
+</script>
+</body>
+</html>
